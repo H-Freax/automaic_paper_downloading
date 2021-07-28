@@ -119,7 +119,7 @@ if __name__ == '__main__':
     # 配置爬虫
     user_agents = GetUserAgent()
     count = 0
-    urls = ["https://www.aclweb.org/anthology/events/acl-2020/#2020-acl-main"]
+    urls = ["https://aclanthology.org/events/acl-2021/#2021-acl-long"]
     url_ins = random.choice(urls)
     headers = {
         "Accept": "*/*",
@@ -134,9 +134,9 @@ if __name__ == '__main__':
     proxy = {'http': ip}
     response = requests.get(url_ins, headers=headers, proxies=proxy).text
     # 匹配论文名称和连接
-    paper_url = re.findall(r'href=https://www.aclweb.org/anthology/2020.acl-main.(.*?).pdf data-toggle', response)
-    paper_url = ["https://www.aclweb.org/anthology/2020.acl-main."+item+".pdf" for item in paper_url]
-    paper_title = re.findall(r'href=/anthology/2020.acl-main.*?/>.*?(.*?)</a>', response)
+    paper_url = re.findall(r'href=https://aclanthology.org/2021.acl-long.(.*?).pdf data-toggle', response)
+    paper_url = ["https://aclanthology.org/2021.acl-long."+item+".pdf" for item in paper_url]
+    paper_title = re.findall(r'href=/2021.acl-long.*?/>.*?(.*?)</a>', response)
     paper_title = [item.replace("<span class=acl-fixed-case>", "").replace("</span>", "") for item in  paper_title]
     # 下载论文
     dst_dir = "./paper"
@@ -165,24 +165,24 @@ if __name__ == '__main__':
         print(item)
 
     # 想要提速，也可以考虑使用多线程
-    # threads_num = 4
-    # batch_size = math.ceil(len(paper_url) / 4)
-    #
-    # threads_list = []
-    # for index in range(threads_num):
-    #     if index < threads_num - 1:
-    #         new_thread = Download_Paper_Thread(index, paper_title[index * batch_size:(index + 1) * batch_size], paper_url[index * batch_size:(index + 1) * batch_size])
-    #     else:
-    #         new_thread = Download_Paper_Thread(index, paper_title[index * batch_size:], paper_url[index * batch_size:])
-    #     # 开启新线程
-    #     threads_list.append(new_thread)
-    #
-    # for thread in threads_list:
-    #     thread.start()
-    #
-    # for thread in threads_list:
-    #     thread.join()
-    #
-    # print("------------------------------------")
-    # for item in error_file_name:
-    #     print(item)
+    threads_num = 4
+    batch_size = math.ceil(len(paper_url) / 4)
+    
+    threads_list = []
+    for index in range(threads_num):
+        if index < threads_num - 1:
+            new_thread = Download_Paper_Thread(index, paper_title[index * batch_size:(index + 1) * batch_size], paper_url[index * batch_size:(index + 1) * batch_size])
+        else:
+            new_thread = Download_Paper_Thread(index, paper_title[index * batch_size:], paper_url[index * batch_size:])
+        # 开启新线程
+        threads_list.append(new_thread)
+    
+    for thread in threads_list:
+        thread.start()
+    
+    for thread in threads_list:
+        thread.join()
+    
+    print("------------------------------------")
+    for item in error_file_name:
+        print(item)
